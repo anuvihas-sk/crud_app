@@ -41,7 +41,7 @@ export default function HomePage() {
 
   return (
     <main className="max-w-4xl mx-auto py-10 space-y-10">
-      <h1 className="text-3xl font-bold">Pricing Manager</h1>
+      <h1 className="text-3xl font-bold">CRUD APPLICATION</h1>
       <PricingForm initialData={editing} onSubmit={handleSubmit} />
       <PricingTable items={items} onEdit={setEditing} onDelete={handleDelete} />
     </main>
