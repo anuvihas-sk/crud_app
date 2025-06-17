@@ -43,16 +43,14 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     formState: { errors },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
-    defaultValues: {
-      name: "",
-      basePrice: 0,
-      tax: 0,
-    },
   })
 
   useEffect(() => {
     if (initialData) {
       reset(initialData)
+    }
+    else{
+      reset({name:""})
     }
   }, [initialData, reset])
 
