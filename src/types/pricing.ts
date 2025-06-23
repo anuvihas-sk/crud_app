@@ -4,4 +4,5 @@ export interface PricingItem {
   basePrice: number
   tax: number
   totalPrice: number
+  note?: string
 }

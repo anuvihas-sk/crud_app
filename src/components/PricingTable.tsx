@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { PricingItem } from "@/types/pricing"
+import { Trash2, Edit2 } from "lucide-react"
 
 type Props = {
   items: PricingItem[]
@@ -18,25 +19,35 @@ type Props = {
 export default function PricingTable({ items, onEdit, onDelete }: Props) {
   return (
     <Table>
-      <TableHeader>
+      <TableHeader className="bg-blue-200">
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Base</TableHead>
-          <TableHead>Tax %</TableHead>
-          <TableHead>Total</TableHead>
+          <TableHead>Procedure</TableHead>
+          <TableHead>Note</TableHead>
+          <TableHead>Price incl taxes (INR)</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.id}>
-            <TableCell>{item.name}</TableCell>
-            <TableCell>${item.basePrice}</TableCell>
-            <TableCell>{item.tax}%</TableCell>
-            <TableCell>${item.totalPrice}</TableCell>
-            <TableCell className="space-x-2">
-              <Button variant="outline" onClick={() => onEdit(item)}>Edit</Button>
-              <Button variant="destructive" onClick={() => onDelete(item.id)}>Delete</Button>
+            <TableCell className="max-w-xs truncate">{item.name}</TableCell>
+            <TableCell>{item.note || "Notes"}</TableCell>
+            <TableCell>₹ {item.totalPrice.toFixed(2)}</TableCell>
+            <TableCell className="space-x-2 flex">
+              <button
+                onClick={() => onEdit(item)}
+                className="p-2 rounded-full border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white transition"
+                aria-label="Edit"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button
+                onClick={() => onDelete(item.id)}
+                className="p-2 rounded-full border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition"
+                aria-label="Delete"
+              >
+                <Trash2 size={16} />
+              </button>
             </TableCell>
           </TableRow>
         ))}
