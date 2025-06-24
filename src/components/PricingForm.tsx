@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
 import { PricingItem } from "@/types/pricing"
+import { Plus } from "lucide-react"
 
 const schema = yup.object({
   name: yup.string().required("Name is required"),
@@ -21,12 +22,14 @@ const schema = yup.object({
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
+  note: yup.string().optional(),
 })
 
 type FormData = {
   name: string
   basePrice: number
   tax: number
+  note?: string
 }
 
 type Props = {
@@ -42,15 +45,19 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     reset,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   })
 
   useEffect(() => {
     if (initialData) {
-      reset(initialData)
-    }
-    else{
-      reset({name:""})
+      reset({
+        name: initialData.name,
+        basePrice: initialData.basePrice,
+        tax: initialData.tax,
+        note: initialData.note ?? "",
+      })
+    } else {
+      reset({ name: "", basePrice: 0, tax: 0, note: "" })
     }
   }, [initialData, reset])
 
@@ -64,21 +71,71 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
       onSubmit={handleSubmit((data) =>
         onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) })
       )}
-      className="space-y-4"
     >
-      <Input placeholder="Name" {...register("name")} />
-      <p className="text-red-500 text-sm">{errors.name?.message}</p>
+      <div className="flex space-x-4 mb-4">
+        <select
+          {...register("name")}
+          className="border border-gray-300 rounded px-3 py-2 w-56"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Procedure Name
+          </option>
+          <option value="Procedure A">Procedure A</option>
+          <option value="Procedure B">Procedure B</option>
+          <option value="Procedure C">Procedure C</option>
+        </select>
 
-      <Input type="number" step="any" placeholder="Base Price" {...register("basePrice")} />
-      <p className="text-red-500 text-sm">{errors.basePrice?.message}</p>
+        <Input
+          type="number"
+          step="any"
+          placeholder="Price"
+          {...register("basePrice")}
+          className="w-28"
+        />
 
-      <Input type="number" step="any" placeholder="Tax (%)" {...register("tax")} />
-      <p className="text-red-500 text-sm">{errors.tax?.message}</p>
+        <select
+          {...register("tax")}
+          className="border border-gray-300 rounded px-3 py-2 w-32"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Tax*
+          </option>
+          <option value="0">0%</option>
+          <option value="5">5%</option>
+          <option value="12">12%</option>
+          <option value="18">18%</option>
+          <option value="28">28%</option>
+        </select>
 
-      <Input value={totalPrice.toFixed(2)} readOnly disabled />
-      <p className="text-gray-500 text-sm">Total Price (incl. tax)</p>
+        <Input
+          type="number"
+          placeholder="Total amount(INR)"
+          value={totalPrice.toFixed(2)}
+          readOnly
+          disabled
+          className="w-44"
+        />
 
-      <Button type="submit">{initialData ? "Update" : "Add"} Pricing</Button>
+        <Input
+          placeholder="Notes"
+          {...register("note")}
+          className="flex-1"
+        />
+      </div>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        type="submit"
+        className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center space-x-1"
+      >
+        <Plus size={16} />
+        <span>Add Procedure</span>
+      </Button>
+
+      
     </form>
   )
 }
