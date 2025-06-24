@@ -6,7 +6,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
 import { PricingItem } from "@/types/pricing"
 import { Trash2, Edit2 } from "lucide-react"
 
