@@ -22,14 +22,14 @@ const schema = yup.object({
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
-  note: yup.string().nullable(),
+  note: yup.string().optional(),
 })
 
 type FormData = {
   name: string
   basePrice: number
   tax: number
-  note: string | null
+  note?: string
 }
 
 type Props = {
@@ -44,7 +44,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     watch,
     reset,
   } = useForm<FormData>({
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema),
   })
 
   useEffect(() => {
@@ -53,10 +53,10 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         name: initialData.name,
         basePrice: initialData.basePrice,
         tax: initialData.tax,
-        note: initialData.note ?? null,
+        note: initialData.note ?? undefined,
       })
     } else {
-      reset({ name: "", basePrice: 0, tax: 0, note: null })
+      reset({ name: "", basePrice: 0, tax: 0, note: undefined })
     }
   }, [initialData, reset])
 
