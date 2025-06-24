@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useEffect } from "react"
-import { PricingItem } from "@/types/pricing"
-import { Plus } from "lucide-react"
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { PricingItem } from "@/types/pricing";
+import { Plus } from "lucide-react";
 
+// ✅ Schema definition
 const schema = yup.object({
   name: yup.string().required("Name is required"),
   basePrice: yup
@@ -22,20 +23,16 @@ const schema = yup.object({
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
-  note: yup.string().optional(),
+  note: yup.string().nullable(),
 })
 
-type FormData = {
-  name: string
-  basePrice: number
-  tax: number
-  note?: string
-}
+// ✅ Infer type from schema for perfect match
+type FormData = yup.InferType<typeof schema>;
 
 type Props = {
-  initialData?: PricingItem
-  onSubmit: (data: Omit<PricingItem, "id">) => void
-}
+  initialData?: PricingItem;
+  onSubmit: (data: Omit<PricingItem, "id">) => void;
+};
 
 export default function PricingForm({ initialData, onSubmit }: Props) {
   const {
@@ -54,23 +51,29 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         basePrice: initialData.basePrice,
         tax: initialData.tax,
         note: initialData.note ?? undefined,
-      })
+      });
     } else {
-      reset({ name: "", basePrice: 0, tax: 0, note: undefined })
+      reset({ name: "", basePrice: 0, tax: 0, note: undefined });
     }
-  }, [initialData, reset])
+  }, [initialData, reset]);
 
-  const basePrice = watch("basePrice") ?? 0
-  const tax = watch("tax") ?? 0
+  const basePrice = watch("basePrice") ?? 0;
+  const tax = watch("tax") ?? 0;
+  const totalPrice = Number(basePrice) + Number(basePrice) * (Number(tax) / 100);
 
-  const totalPrice = Number(basePrice) + Number(basePrice) * (Number(tax) / 100)
+  const handleFormSubmit = (data: FormData) => {
+    const formattedData: Omit<PricingItem, "id"> = {
+      name: data.name,
+      basePrice: data.basePrice,
+      tax: data.tax,
+      note: data.note ?? undefined,
+      totalPrice: Number(totalPrice.toFixed(2)),
+    };
+    onSubmit(formattedData);
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit((data) =>
-        onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) } as unknown as Omit<PricingItem, "id">)
-      )}
-    >
+    <form onSubmit={handleSubmit(handleFormSubmit as any)}>
       <div className="flex space-x-4 mb-4">
         <select
           {...register("name")}
@@ -110,7 +113,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
 
         <Input
           type="number"
-          placeholder="Total amount(INR)"
+          placeholder="Total amount (INR)"
           value={totalPrice.toFixed(2)}
           readOnly
           disabled
@@ -143,5 +146,5 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         </Button>
       </div>
     </form>
-  )
+  );
 }
