@@ -22,14 +22,14 @@ const schema = yup.object({
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
-  note: yup.string().optional(),
+  note: yup.string().nullable(),
 })
 
 type FormData = {
   name: string
   basePrice: number
   tax: number
-  note?: string
+  note: string | null
 }
 
 type Props = {
@@ -43,7 +43,6 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     handleSubmit,
     watch,
     reset,
-    formState: { errors },
   } = useForm<FormData>({
     resolver: yupResolver(schema) as any,
   })
@@ -54,10 +53,10 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         name: initialData.name,
         basePrice: initialData.basePrice,
         tax: initialData.tax,
-        note: initialData.note ?? "",
+        note: initialData.note ?? null,
       })
     } else {
-      reset({ name: "", basePrice: 0, tax: 0, note: "" })
+      reset({ name: "", basePrice: 0, tax: 0, note: null })
     }
   }, [initialData, reset])
 
@@ -69,7 +68,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
   return (
     <form
       onSubmit={handleSubmit((data) =>
-        onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) })
+      onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) } as unknown as Omit<PricingItem, "id">)
       )}
     >
       <div className="flex space-x-4 mb-4">
@@ -135,7 +134,14 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         <span>Add Procedure</span>
       </Button>
 
-      
+      <div className="flex justify-end space-x-4">
+        <Button variant="outline" type="button">
+          Cancel
+        </Button>
+        <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
+          Save
+        </Button>
+      </div>
     </form>
   )
 }
