@@ -68,7 +68,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
   return (
     <form
       onSubmit={handleSubmit((data) =>
-      onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) } as unknown as Omit<PricingItem, "id">)
+        onSubmit({ ...data, totalPrice: Number(totalPrice.toFixed(2)) } as unknown as Omit<PricingItem, "id">)
       )}
     >
       <div className="flex space-x-4 mb-4">
