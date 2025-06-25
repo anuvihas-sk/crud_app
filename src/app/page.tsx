@@ -10,7 +10,6 @@ import {
   deletePricing,
 } from "@/lib/api"
 import { PricingItem } from "@/types/pricing"
-import { Home, Plus } from "lucide-react"
 import Navbar from "@/components/Navbar"
 
 export default function HomePage() {
