@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import PricingForm from "@/components/PricingForm"
+import MultiProcedureForm from "@/components/MultiProcedureForm"
 import PricingTable from "@/components/PricingTable"
 import {
   getPricing,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/api"
 import { PricingItem } from "@/types/pricing"
 import { Home, Plus } from "lucide-react"
+import Navbar from "@/components/Navbar"
 
 export default function HomePage() {
   const [items, setItems] = useState<PricingItem[]>([])
@@ -22,12 +23,16 @@ export default function HomePage() {
     setItems(res.data)
   }
 
-  const handleSubmit = async (data: Omit<PricingItem, "id">) => {
+  const handleSubmit = async (data: Omit<PricingItem, "id">[]) => {
     if (editing) {
-      await updatePricing(editing.id, data)
+      // If editing, update the single item
+      await updatePricing(editing.id, data[0])
       setEditing(undefined)
     } else {
-      await addPricing(data)
+      // If adding multiple, add each procedure
+      for (const proc of data) {
+        await addPricing(proc)
+      }
     }
     setIsFormOpen(false)
     fetchData()
@@ -59,19 +64,7 @@ export default function HomePage() {
 
   return (
     <>
-      <header className="bg-blue-600 text-white flex items-center justify-between px-6 py-3">
-        <div className="flex items-center space-x-3">
-          <Home size={24} />
-          <h1 className="text-xl font-semibold">Pricing</h1>
-        </div>
-        <button
-          onClick={openAddForm}
-          className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-700 px-3 py-1 rounded"
-        >
-          <Plus size={16} />
-          <span>Add Procedure</span>
-        </button>
-      </header>
+      <Navbar onAddProcedure={openAddForm} />
 
       <main className="max-w-4xl mx-auto py-6">
         <PricingTable items={items} onEdit={openEditForm} onDelete={handleDelete} />
@@ -79,7 +72,7 @@ export default function HomePage() {
 
       {isFormOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl">
             <div className="flex items-center justify-between rounded-t-lg bg-blue-600 p-4">
               <h2 className="text-lg font-semibold text-white">{editing ? "Edit Procedure" : "Add Procedure"}</h2>
               <button
@@ -93,7 +86,7 @@ export default function HomePage() {
               </button>
             </div>
             <div className="p-6">
-              <PricingForm initialData={editing} onSubmit={handleSubmit} />
+              <MultiProcedureForm initialData={editing ? [editing] : []} onSubmit={handleSubmit} />
               <div className="flex justify-end space-x-4 mt-6">
                 <button
                   onClick={closeForm}

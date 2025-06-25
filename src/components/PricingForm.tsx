@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { PricingItem } from "@/types/pricing";
 import { Plus } from "lucide-react";
 
-// ✅ Schema definition
 const schema = yup.object({
   name: yup.string().required("Name is required"),
   basePrice: yup
@@ -19,14 +18,16 @@ const schema = yup.object({
     .required("Base price is required"),
   tax: yup
     .number()
+    .transform((value, originalValue) => {
+      return originalValue === "" ? undefined : Number(originalValue);
+    })
     .typeError("Tax must be a number")
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
   note: yup.string().nullable(),
-})
+});
 
-// ✅ Infer type from schema for perfect match
 type FormData = yup.InferType<typeof schema>;
 
 type Props = {
@@ -40,9 +41,9 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     handleSubmit,
     watch,
     reset,
-  } = useForm<FormData>({
-    resolver: yupResolver(schema),
-  })
+  } = useForm<Omit<PricingItem, "id">>({
+    resolver: yupResolver(schema) as any,
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -61,7 +62,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
   const tax = watch("tax") ?? 0;
   const totalPrice = Number(basePrice) + Number(basePrice) * (Number(tax) / 100);
 
-  const handleFormSubmit = (data: FormData) => {
+  const handleFormSubmit = (data: Omit<PricingItem, "id">) => {
     const formattedData: Omit<PricingItem, "id"> = {
       name: data.name,
       basePrice: data.basePrice,
@@ -73,7 +74,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit as any)}>
+    <form onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="flex space-x-4 mb-4">
         <select
           {...register("name")}
@@ -104,11 +105,11 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
           <option value="" disabled>
             Tax*
           </option>
-          <option value="0">0%</option>
-          <option value="5">5%</option>
-          <option value="12">12%</option>
-          <option value="18">18%</option>
-          <option value="28">28%</option>
+          <option value={0}>0%</option>
+          <option value={5}>5%</option>
+          <option value={12}>12%</option>
+          <option value={18}>18%</option>
+          <option value={28}>28%</option>
         </select>
 
         <Input
@@ -123,7 +124,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         <Input
           placeholder="Notes"
           {...register("note")}
-          className="flex-1"
+          className="w-56"
         />
       </div>
 
@@ -136,15 +137,6 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         <Plus size={16} />
         <span>Add Procedure</span>
       </Button>
-
-      <div className="flex justify-end space-x-4">
-        <Button variant="outline" type="button">
-          Cancel
-        </Button>
-        <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
-          Save
-        </Button>
-      </div>
     </form>
   );
 }
