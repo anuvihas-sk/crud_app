@@ -28,8 +28,6 @@ const schema = yup.object({
   note: yup.string().nullable(),
 });
 
-type FormData = yup.InferType<typeof schema>;
-
 type Props = {
   initialData?: PricingItem;
   onSubmit: (data: Omit<PricingItem, "id">) => void;
@@ -42,7 +40,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     watch,
     reset,
   } = useForm<Omit<PricingItem, "id">>({
-    resolver: yupResolver(schema) as any,
+    resolver: yupResolver(schema),
   });
 
   useEffect(() => {

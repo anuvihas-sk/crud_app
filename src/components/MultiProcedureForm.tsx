@@ -72,14 +72,13 @@ export default function MultiProcedureForm({ initialData = [], onSubmit }: Props
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate required fields (name, basePrice, tax)
     for (const proc of procedures) {
       if (!proc.name || proc.basePrice === "" || proc.tax === "") {
         alert("Please fill all required fields in each procedure.");
         return;
       }
     }
-    // Prepare data without id and convert basePrice and tax to numbers
+
     const dataToSubmit = procedures.map(({ id, basePrice, tax, ...rest }) => ({
       basePrice: Number(basePrice),
       tax: Number(tax),
@@ -91,7 +90,7 @@ export default function MultiProcedureForm({ initialData = [], onSubmit }: Props
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
-        {procedures.map((proc, index) => (
+        {procedures.map((proc) => (
           <div key={proc.id} className="flex space-x-4 items-center">
             <select
               value={proc.name}
@@ -174,7 +173,6 @@ export default function MultiProcedureForm({ initialData = [], onSubmit }: Props
           <Plus size={16} />
           <span>Add Procedure</span>
         </Button>
-
       </div>
     </form>
   );
