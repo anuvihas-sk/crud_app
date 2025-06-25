@@ -29,7 +29,6 @@ const schema: ObjectSchema<FormData> = yup.object({
   note: yup.string().nullable().notRequired(),
 });
 
-// This type matches the yup schema exactly
 interface FormData {
   name: string;
   basePrice: number;
@@ -74,7 +73,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
       name: data.name,
       basePrice: data.basePrice,
       tax: data.tax,
-      note: data.note ?? undefined, // optional in domain type
+      note: data.note ?? undefined, 
       totalPrice: Number(totalPrice.toFixed(2)),
     };
     onSubmit(formattedData);
