@@ -3,13 +3,14 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import type { ObjectSchema } from "yup";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { PricingItem } from "@/types/pricing";
 import { Plus } from "lucide-react";
 
-const schema = yup.object({
+const schema: ObjectSchema<FormData> = yup.object({
   name: yup.string().required("Name is required"),
   basePrice: yup
     .number()
@@ -18,15 +19,23 @@ const schema = yup.object({
     .required("Base price is required"),
   tax: yup
     .number()
-    .transform((value, originalValue) => {
-      return originalValue === "" ? undefined : Number(originalValue);
-    })
+    .transform((value, originalValue) =>
+      originalValue === "" ? undefined : Number(originalValue)
+    )
     .typeError("Tax must be a number")
     .min(0, "Tax must be at least 0%")
     .max(100, "Tax cannot exceed 100%")
     .required("Tax is required"),
-  note: yup.string().nullable(),
+  note: yup.string().nullable().notRequired(),
 });
+
+// This type matches the yup schema exactly
+interface FormData {
+  name: string;
+  basePrice: number;
+  tax: number;
+  note?: string | null | undefined;
+}
 
 type Props = {
   initialData?: PricingItem;
@@ -39,7 +48,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
     handleSubmit,
     watch,
     reset,
-  } = useForm<Omit<PricingItem, "id">>({
+  } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
 
@@ -49,10 +58,10 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
         name: initialData.name,
         basePrice: initialData.basePrice,
         tax: initialData.tax,
-        note: initialData.note ?? undefined,
+        note: initialData.note ?? null,
       });
     } else {
-      reset({ name: "", basePrice: 0, tax: 0, note: undefined });
+      reset({ name: "", basePrice: 0, tax: 0, note: null });
     }
   }, [initialData, reset]);
 
@@ -60,12 +69,12 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
   const tax = watch("tax") ?? 0;
   const totalPrice = Number(basePrice) + Number(basePrice) * (Number(tax) / 100);
 
-  const handleFormSubmit = (data: Omit<PricingItem, "id">) => {
+  const handleFormSubmit = (data: FormData) => {
     const formattedData: Omit<PricingItem, "id"> = {
       name: data.name,
       basePrice: data.basePrice,
       tax: data.tax,
-      note: data.note ?? undefined,
+      note: data.note ?? undefined, // optional in domain type
       totalPrice: Number(totalPrice.toFixed(2)),
     };
     onSubmit(formattedData);
@@ -78,6 +87,7 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
           {...register("name")}
           className="border border-gray-300 rounded px-3 py-2 w-56"
           defaultValue=""
+          required
         >
           <option value="" disabled>
             Procedure Name
@@ -93,12 +103,14 @@ export default function PricingForm({ initialData, onSubmit }: Props) {
           placeholder="Price"
           {...register("basePrice")}
           className="w-28"
+          required
         />
 
         <select
           {...register("tax")}
           className="border border-gray-300 rounded px-3 py-2 w-32"
           defaultValue=""
+          required
         >
           <option value="" disabled>
             Tax*
